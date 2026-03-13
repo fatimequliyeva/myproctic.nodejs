@@ -1,5 +1,5 @@
 const express = require('express');
-const connectDB = require('./config');
+const { connectDB } = require('./config');
 const logger = require('./middlewares/logger');
 
 const genreRoute = require('./routes/genreRoute');

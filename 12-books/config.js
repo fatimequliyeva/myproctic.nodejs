@@ -1,6 +1,8 @@
-// config.js
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
 
+// MongoDB bağlantısı
 const connectDB = async () => {
   try {
     await mongoose.connect(
@@ -12,4 +14,11 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+// Cloudinary bağlantısı
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
+module.exports = { connectDB, cloudinary };

@@ -1,30 +1,26 @@
 const express = require('express');
-const multer = require('multer');
-const bookController = require('../controllers/bookController');
-const bookValidator = require('../middlewares/bookValidator');
-
 const router = express.Router();
+const bookController = require('../controllers/bookController');
+const multer = require('multer');
+const path = require('path');
 
-// Multer storage
+// Multer storage (müvəqqəti serverdə saxlayır)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-// CRUD əməliyyatları
+// Routes
 router.get('/', bookController.getAllBooks);
 router.get('/:id', bookController.getBookById);
-
-// burada upload.single birinci olmalıdır ki, req.body dolsun
-router.post('/', upload.single('coverImageURL'), bookValidator, bookController.addNewBook);
-
-router.put('/:id', upload.single('coverImageURL'), bookValidator, bookController.updateBookById);
+router.post('/add', upload.single('coverImage'), bookController.addNewBook);
+router.put('/:id', upload.single('coverImage'), bookController.updateBookById);
 router.delete('/:id', bookController.deleteBookById);
 
 module.exports = router;
