@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function AddBook() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [language, setLanguage] = useState('');
+  const [genre, setGenre] = useState('');
   const [coverImage, setCoverImage] = useState(null);
+  const [genres, setGenres] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/genres")
+      .then(res => res.json())
+      .then(data => setGenres(data.data))
+      .catch(err => console.error(err));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,6 +24,8 @@ function AddBook() {
     formData.append('author', author);
     formData.append('description', description);
     formData.append('price', price);
+    formData.append('language', language);
+    formData.append('genre', genre); // janrın ID-si
     formData.append("coverImage", coverImage);
 
     try {
@@ -83,6 +95,24 @@ function AddBook() {
             placeholder="Price" 
             className="border rounded p-2 focus:ring focus:ring-blue-300"
           />
+          <input 
+            type="text" 
+            value={language} 
+            onChange={e => setLanguage(e.target.value)} 
+            placeholder="Language" 
+            className="border rounded p-2 focus:ring focus:ring-blue-300"
+          />
+          <select 
+            value={genre} 
+            onChange={e => setGenre(e.target.value)} 
+            className="border rounded p-2 focus:ring focus:ring-blue-300"
+          >
+            <option value="">Select Genre</option>
+            {genres.map(g => (
+              <option key={g._id} value={g._id}>{g.name}</option>
+            ))}
+          </select>
+
           <button 
             type="submit" 
             className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
