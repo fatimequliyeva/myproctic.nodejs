@@ -1,7 +1,7 @@
-const BookModel = require('../models/bookModel');
-const { cloudinary } = require('../config');
+const BookModel = require('../models/bookModel');  //seyma qowulub 
+const { cloudinary } = require('../config');  //clodinry qowmaqdi 
 
-const bookController = {
+const bookController = {  //sade bir abywekdi yaratmisam 
 
   // 1️⃣ Bütün kitabları gətirmək
   getAllBooks: async (req, res) => {
