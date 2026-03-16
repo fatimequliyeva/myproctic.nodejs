@@ -1,4 +1,6 @@
 const DoctorModel = require('../models/doctorModel')
+const { uploadImageBuffer } = require("../config/cloudinary")
+
 
 // GET all doctors
 const getAllDoctors = async (req, res) => {
@@ -50,14 +52,49 @@ const getDoctorById = async (req, res) => {
 
 // CREATE doctor
 const createDoctor = async (req, res) => {
-    try {
-        const doctor = await DoctorModel.create(req.body)
-        res.status(201).json(doctor)
+  try {
 
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+    const { name, surname, email, age, position, department } = req.body
+
+    if (!name || !surname || !email) {
+      return res.status(400).json({
+        message: "Name, surname and email required"
+      })
     }
-}
+
+    let images = []
+
+    if (req.files && req.files.length > 0) {
+
+      const uploadedImages = await Promise.all(
+        req.files.map((file) =>
+          uploadImageBuffer(file.buffer, {
+            folder: "ptp101/doctors",
+            resource_type: "image"
+          })
+        )
+      )
+
+      images = uploadedImages.map(img => img.secure_url)
+    }
+
+    const doctor = new DoctorModel({
+      name,
+      surname,
+      email,
+      age,
+      position,
+      department,
+      images
+    })
+
+    await doctor.save()
+
+    res.status(201).json(doctor)
+
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }}
 
 // UPDATE doctor
 const updateDoctor = async (req, res) => {

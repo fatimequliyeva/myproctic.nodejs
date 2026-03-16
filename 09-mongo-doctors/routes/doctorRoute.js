@@ -1,13 +1,15 @@
 const express = require('express')
 const router = express.Router()
-const { 
-    getAllDoctors, 
-    getDoctorById, 
-    createDoctor, 
-    updateDoctor, 
-    deleteDoctor, 
-    updateDoctorPhoto 
+
+const {
+    getAllDoctors,
+    getDoctorById,
+    createDoctor,
+    updateDoctor,
+    deleteDoctor,
+    updateDoctorPhoto
 } = require('../controllers/doctorController')
+const doctorController = require("../controllers/doctorController")
 const { validateDoctor } = require('../middleware/doctorValidator')
 const multer = require('multer')
 
@@ -20,15 +22,19 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + '-' + file.originalname)
     }
 })
-const upload = multer({ storage: storage })
+const upload = multer({ storage: multer.memoryStorage() })
+
 
 router.get('/', getAllDoctors)
 router.get('/:id', getDoctorById)
-router.post('/', validateDoctor, createDoctor)
+
+router.post("/", upload.array("images", 5), doctorController.createDoctor)
 router.put('/:id', validateDoctor, updateDoctor)
+
 router.delete('/:id', deleteDoctor)
 
-// 🔹 Yeni route şəkil üçün
-router.put('/:id/photo', upload.single('photo'), updateDoctorPhoto)
+// şəkil upload
+
+router.post("/", upload.array("images", 5), createDoctor)
 
 module.exports = router

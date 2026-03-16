@@ -11,9 +11,9 @@ const DoctorSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Department',
     },
-    photo: {
-        type: String, // şəkilin URL-i
-        default: null,
+    images: {
+        type : [String],
+        default : []
     }
 }, { timestamps: true , versionKey: false })
 
