@@ -1,7 +1,8 @@
 const express = require('express');
 const { connectDB } = require('./config');
 const logger = require('./middlewares/logger');
-
+const userRoute = require('./routes/userRoute.js');
+const authRoute = require('./routes/authRoute')
 const genreRoute = require('./routes/genreRoute');
 const bookRoute = require('./routes/bookRoute');
 const uploadRoute = require('./routes/uploadRoute');
@@ -20,7 +21,8 @@ app.use(logger);
 app.use('/api/genres', genreRoute);
 app.use('/api/books', bookRoute);
 app.use('/api/upload', uploadRoute);
-
+app.use('/api/users', userRoute) // user route
+app.use('/api/auth', authRoute) // auth route
 // uploads qovluğunu statik açırıq
 app.use('/uploads', express.static('uploads'));
 
