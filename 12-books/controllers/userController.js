@@ -59,11 +59,7 @@ const userController = {
                 })
             }
 
-            res.status(200).json({
-                message: 'User deleted successfully',
-                data: deletedUser
-            })
-
+      
         } catch (error) {
             res.status(500).json({
                 message: error.message,
@@ -76,3 +72,4 @@ const userController = {
 
 
 module.exports = userController
+

@@ -1,10 +1,10 @@
-// routes/userRoute.js
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const userController = require('../controllers/userController')
 
-// test route
-router.get('/', (req, res) => {
-  res.send('User route işləyir!');
-});
+router.get('/', userController.getAllUsers )  
+router.get('/:id', userController.getUserById )
+router.delete('/:id', userController.deleteUserById )
 
-module.exports = router;
+
+module.exports = router
