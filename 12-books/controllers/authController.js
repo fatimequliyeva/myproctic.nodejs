@@ -1,5 +1,8 @@
 const UserModel = require('../models/userModel')
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+
+require('dotenv').config()
 
 const register = async (req, res) => {
     try {
@@ -42,7 +45,44 @@ const register = async (req, res) => {
     }
 
 }
-const login = (req, res) => {
+const login = async(req, res) => {
+    try {
+        const{email,password}=req.body
+        const user=await UserModel.findOne({email:email})
+        if(!user)return res.status(400).json({
+            message:'Invalid email! or password!'
+        })
+        const isPasswordValid=await bcrypt.compare(password,user.password)
+        if(!isPasswordValid){
+            return res.status(400).json({
+                message:'invalid email or password!'
+            })
+        }
+
+        const token=jwt.sign({
+            id: user._id,
+            email:user.email,
+            role:user.role,
+            
+        },process.env.JWT_SECRET,{expiresIn:'1h'})
+
+        res.status(200).json({
+            message:'User logged in successfully',
+            data:{
+                id: user._id,
+                username:user.username,
+                email:user.email,
+                role:user.role,
+                token:token
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:error.message
+        })
+        
+    }
+
 
 }
 
