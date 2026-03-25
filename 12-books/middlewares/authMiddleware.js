@@ -9,7 +9,7 @@ const authenticate=(req,res,next)=>{
                 message:'Authorization header missing or invalid'
             })
         }
-        const token=authHeader.split('')[1]
+        const token=authHeader.split(' ')[1]
         const decoded=jwt.verify(token,process.env.JWT_SECRET)
         console.log(decoded)
 
@@ -18,12 +18,36 @@ const authenticate=(req,res,next)=>{
         }
         next()
     } catch (error) {
-        res.stayus(401).json({
+        res.status(401).json({
             message:'Unauthorized',
-            eror:error.message
+            error:error.message
         })
         
     }
 }
 
-module.exports(authenticate);
+const authorize=(...allowedRoles)=>{
+    return (req,res,next)=>{
+        try {
+            const{role}=req.user
+            if(!allowedRoles.includes(role)){
+                return res.status(403).json({
+                    message:'Forbidden: You do not have permission to access this resource'
+                })
+            }
+            next()
+        } catch (error) {
+            res.status(403).json({
+                message:'Forbidden',
+                error:error.message
+            })
+        }
+    }
+}
+
+
+
+module.exports={
+    authenticate,
+    authorize  
+};
