@@ -1,10 +1,16 @@
-const express = require('express')
-const router = express.Router()
-const userController = require('../controllers/userController')
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/userController');
 
-router.get('/', userController.getAllUsers )  
-router.get('/:id', userController.getUserById )
-router.delete('/:id', userController.deleteUserById )
+const { authenticate, authorize } = require('../middlewares/authMiddleware');
 
+// 🔐 yalnız admin bütün userləri görə bilər
+router.get('/', authenticate, authorize('admin'), userController.getAllUsers);
 
-module.exports = router
+// 🔐 login olan user görə bilər (istəsən sonradan limit qoyarıq)
+router.get('/:id', authenticate, userController.getUserById);
+
+// 🔐 yalnız admin user silə bilər
+router.delete('/:id', authenticate, authorize('admin'), userController.deleteUserById);
+
+module.exports = router;

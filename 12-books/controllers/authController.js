@@ -1,54 +1,53 @@
 const UserModel = require('../models/userModel')
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
-
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 require('dotenv').config()
 
 const register = async (req, res) => {
     try {
-        const { username, password, email } = req.body
+        const { username, password, email } = req.body;
 
-
-        const existingUser = await UserModel.findOne({ email: email })
-
-        console.log(existingUser);
-
+        const existingUser = await UserModel.findOne({ email });
         if (existingUser) {
-            return res.status(400).json({
-                message: 'Email already exists'
-            })
+            return res.status(400).json({ message: 'Email already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // console.log('hashed password', hashedPassword);
+        // 🔑 token yarat
+        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         const newUser = new UserModel({
             username,
             password: hashedPassword,
-            email
-        })
+            email,
+            verificationToken
+        });
 
-        await newUser.save()
-        
-       
-          
+        await newUser.save();
+
+        // 🔗 link
+        const link = `http://localhost:8080/api/auth/verify/${verificationToken}`;
+
+        // ✉️ email göndər
+        await sendEmail(
+            email,
+            "Email Verification",
+            `<h2>Emailini təsdiqlə</h2>
+             <a href="${link}">Təsdiqlə</a>`
+        );
 
         res.status(201).json({
-            message: 'User registered successfully',
-            data: {
-                id: newUser._id,
-                username: newUser.username,
-                email: newUser.email
-            }
-        })
+            message: 'User registered. Emailə bax və təsdiqlə!'
+        });
 
     } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ message: error.message });
     }
-
-}
+};
 const login = async (req, res) => {
     try {
         const { email, password } = req.body
@@ -89,9 +88,32 @@ const login = async (req, res) => {
 
 
 }
+const verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
 
+        const user = await UserModel.findOne({ verificationToken: token });
+
+        if (!user) {
+            return res.status(400).json({
+                message: "Invalid token"
+            });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = null;
+
+        await user.save();
+
+        res.send("Email successfully verified ✅");
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
     register,
-    login
+    login,
+    verifyEmail
 }
